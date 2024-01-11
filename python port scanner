@@ -1,0 +1,55 @@
+import sys
+import socket
+from datetime import datetime
+
+DEFAULT_TIMEOUT = 1
+DEFAULT_PORT_RANGE = (1, 9050)
+
+def scan_ports(target, port_range=DEFAULT_PORT_RANGE):
+    try:
+        print("-" * 60)
+        print(f"Scanning target {target} | Port Range: {port_range}")
+        print(f"Time started: {datetime.now()}")
+        print("-" * 60)
+
+        for port in range(port_range[0], port_range[1] + 1):
+            scan_port(target, port)
+
+    except KeyboardInterrupt:
+        print("\nExiting program.")
+        sys.exit()
+    except socket.gaierror:
+        print("Hostname could not be resolved.")
+        sys.exit()
+    except socket.error:
+        print("Couldn't connect to the server.")
+        sys.exit()
+
+def scan_port(target, port):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(DEFAULT_TIMEOUT)
+            result = s.connect_ex((target, port))
+
+            if result == 0:
+                print(f"Port {port} is open")
+    except socket.error:
+        print(f"Error occurred while scanning port {port}")
+
+def main():
+    if len(sys.argv) != 2:
+        print("Invalid amount of arguments.")
+        print("Syntax: python3 scanner.py <ip>")
+        sys.exit()
+
+    target = socket.gethostbyname(sys.argv[1])
+    
+    
+    port_range = DEFAULT_PORT_RANGE
+    if len(sys.argv) == 4:
+        port_range = (int(sys.argv[2]), int(sys.argv[3]))
+
+    scan_ports(target, port_range)
+
+if __name__ == "__main__":
+    main()
